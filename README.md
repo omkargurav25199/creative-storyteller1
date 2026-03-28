@@ -2,7 +2,7 @@
 
 ### Multimodal AI Storytelling — Text, Images, Video & Audio in One Fluid Experience
 
-Creative Storyteller is a production-grade AI storytelling platform that breaks the "text box" paradigm. Instead of generating text in one tool, images in another, and video somewhere else, it produces a **complete illustrated, animated, and narrated storybook** from a single prompt — all powered by Google's AI stack.
+Project HailMary is a production-grade AI storytelling platform that breaks the "text box" paradigm. Instead of generating text in one tool, images in another, and video somewhere else, it produces a **complete illustrated, animated, and narrated storybook** from a single prompt — all powered by Google's AI stack.
 
 **Give it a prompt like:**
 > *"Create a storybook about a brave little fox named Luna who discovers a hidden garden of glowing flowers in a moonlit forest"*
