@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+*.png
+*.wav
+*.mp4
+.adk/
+test_output.png
+test_fox_video.mp4
+test_video.py
+test_video_debug.py
+test_interleaved.py
