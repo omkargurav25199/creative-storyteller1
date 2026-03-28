@@ -26,49 +26,6 @@ export default function PromptForm({ onGenerate }: any) {
         🪶 writing...
       </p>
 
-      <div className="flex gap-4 flex-wrap">
-
-        <select
-          className="glow px-3 py-2 rounded-md border"
-          value={style}
-          onChange={(e) => {
-            setStyle(e.target.value);
-            playSound();
-          }}
-        >
-          <option value="storybook">Storybook</option>
-          <option value="watercolor">Watercolor</option>
-          <option value="anime">Anime</option>
-          <option value="comic">Comic</option>
-        </select>
-
-        <select
-          className="glow px-3 py-2 rounded-md border"
-          value={audience}
-          onChange={(e) => {
-            setAudience(e.target.value);
-            playSound();
-          }}
-        >
-          <option value="children">Children</option>
-          <option value="teens">Teens</option>
-          <option value="adults">Adults</option>
-        </select>
-
-        <select
-          className="glow px-3 py-2 rounded-md border"
-          value={numScenes}
-          onChange={(e) => {
-            setNumScenes(Number(e.target.value));
-            playSound();
-          }}
-        >
-          <option value={3}>3 Scenes</option>
-          <option value={4}>4 Scenes</option>
-          <option value={5}>5 Scenes</option>
-        </select>
-
-      </div>
 
       <button
         onClick={() => onGenerate(prompt, style, audience, numScenes)}
