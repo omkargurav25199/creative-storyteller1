@@ -18,7 +18,7 @@ Project HailMary is a production-grade AI storytelling platform that breaks the 
 
 ## Live Demo
 
-**Deployed URL:** `https://creative-storyteller-XXXXX-uc.a.run.app`
+**Deployed URL:** `https://creative-storyteller-zaad2c7uvq-uc.a.run.app`
 *(Replace with actual Cloud Run URL after deployment)*
 
 ---

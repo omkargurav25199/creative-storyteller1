@@ -1,13 +1,13 @@
 FROM python:3.11-slim
-
 WORKDIR /app
-
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
 COPY creative_storyteller/ ./creative_storyteller/
-
+COPY main.py .
 ENV PORT=8080
+ENV GOOGLE_CLOUD_PROJECT=hailmary-491613
+ENV GOOGLE_CLOUD_LOCATION=us-central1
+ENV GOOGLE_GENAI_USE_VERTEXAI=TRUE
+ENV GCS_BUCKET=hailmary-491613-media
 EXPOSE 8080
-
-CMD ["uvicorn", "google.adk.cli.fast_api:get_fast_api_app", "--host", "0.0.0.0", "--port", "8080", "--factory"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
