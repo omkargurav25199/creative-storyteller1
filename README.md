@@ -1,4 +1,4 @@
-# Creative Storyteller
+# Project HailMary
 
 ### Multimodal AI Storytelling — Text, Images, Video & Audio in One Fluid Experience
 
