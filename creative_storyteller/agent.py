@@ -144,6 +144,82 @@ def generate_scene_videos(illustration_data: str) -> dict:
 
     return {"scene_videos": videos, "total_videos": len([x for x in videos if x.get("video_url")])}
 
+# === TOOL 4: Merge Videos into One ===
+def merge_scene_videos_into_one(video_data: str) -> dict:
+    """Download all scene videos from GCS and merge them into one continuous video.
+    Args: video_data: Text containing video URLs from video producer.
+    Returns: dict with merged_video_url."""
+    import tempfile, os
+    urls = re.findall(r'https://storage\.googleapis\.com/[^\s\'"}\]]+\.mp4', video_data)
+    if not urls:
+        return {"merged_video_url": None, "error": "No video URLs found to merge"}
+
+    logger.info(f"Merging {len(urls)} videos into one...")
+    temp_files = []
+    try:
+        import httpx
+        from moviepy.editor import VideoFileClip, concatenate_videoclips
+
+        # Download each video to a temp file
+        for i, url in enumerate(urls):
+            resp = httpx.get(url, timeout=60)
+            if resp.status_code == 200:
+                tmp = tempfile.NamedTemporaryFile(delete=False, suffix=f"_scene_{i+1}.mp4")
+                tmp.write(resp.content)
+                tmp.close()
+                temp_files.append(tmp.name)
+                logger.info(f"Downloaded scene {i+1}: {len(resp.content)} bytes")
+
+        if not temp_files:
+            return {"merged_video_url": None, "error": "No videos could be downloaded"}
+
+        # Merge all clips
+        clips = [VideoFileClip(f) for f in temp_files]
+        final = concatenate_videoclips(clips, method="compose")
+
+        # Write merged video
+        output_path = tempfile.NamedTemporaryFile(delete=False, suffix="_merged.mp4").name
+        final.write_videofile(output_path, codec="libx264", audio_codec="aac",
+                            temp_audiofile=tempfile.mktemp(suffix=".m4a"), logger=None)
+
+        # Close clips
+        for c in clips:
+            c.close()
+        final.close()
+
+        # Upload merged video to GCS
+        with open(output_path, "rb") as f:
+            merged_bytes = f.read()
+
+        merged_url = ""
+        if GCS_BUCKET and PROJECT_ID:
+            fn = f"stories/{STORY_ID}/full_story_video.mp4"
+            merged_url = _gcs(merged_bytes, fn, "video/mp4")
+
+        logger.info(f"Merged video saved: {merged_url} ({len(merged_bytes)} bytes)")
+
+        # Cleanup temp files
+        for f in temp_files:
+            try: os.unlink(f)
+            except: pass
+        try: os.unlink(output_path)
+        except: pass
+
+        total_duration = sum(c.duration for c in clips) if clips else 0
+        return {
+            "merged_video_url": merged_url,
+            "total_duration_seconds": round(total_duration, 1),
+            "scenes_merged": len(temp_files),
+        }
+
+    except Exception as e:
+        logger.error(f"Merge failed: {e}")
+        for f in temp_files:
+            try: os.unlink(f)
+            except: pass
+        return {"merged_video_url": None, "error": str(e)}
+
+
 # === TOOL 3: Narration ===
 def generate_scene_narrations(story_text: str) -> dict:
     """Voice narration via Gemini TTS.
@@ -214,19 +290,31 @@ Report all video URLs when done.""",
     description="8-second Veo 3.1 videos",
     tools=[generate_scene_videos], output_key="video_results")
 
+video_merger = Agent(name="VideoMerger", model="gemini-2.5-flash",
+    instruction="""Read {video_results}. Call merge_scene_videos_into_one ONCE with that text.
+This will download all scene videos and combine them into ONE continuous story video.
+Report the merged video URL.""",
+    description="Merges scene videos into one",
+    tools=[merge_scene_videos_into_one], output_key="merged_video")
+
+
 assembler = Agent(name="StoryAssembler", model="gemini-2.5-flash",
     instruction="""Present the complete story:
 - Story: {story_plan}
 - Illustrations: {illustration_results}
-- Videos: {video_results}
+- Individual scene videos: {video_results}
+- FULL MERGED VIDEO: {merged_video}
 - Narration: {narration_results}
 
-For EACH scene:
-## Scene [N]: [Title]
+Start with:
+## [Story Title]
+**Complete Story Video:** [merged_video URL from merged_video results]
+
+Then for EACH scene:
+### Scene [N]: [Title]
 [Narrative text]
 **Illustration:** [image URL]
-**Video (8s with AI audio):** [video URL]
-**Narration:** [audio URL or 'Not available']
+**Scene clip:** [video URL]
 ---
 End with production summary. COPY actual URLs.""",
     description="Final presentation")
@@ -234,5 +322,5 @@ End with production summary. COPY actual URLs.""",
 # === PIPELINE ===
 parallel_media = ParallelAgent(name="MediaProduction", sub_agents=[illustrator, narrator])
 root_agent = SequentialAgent(name="CreativeStorytellerPipeline",
-    sub_agents=[story_planner, parallel_media, video_producer, assembler],
-    description="Multimodal storytelling with 8s videos per scene.")
+    sub_agents=[story_planner, parallel_media, video_producer, video_merger, assembler],
+    description="Multimodal storytelling with merged final video.")
