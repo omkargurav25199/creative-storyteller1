@@ -158,7 +158,10 @@ def merge_scene_videos_into_one(video_data: str) -> dict:
     temp_files = []
     try:
         import httpx
-        from moviepy.editor import VideoFileClip, concatenate_videoclips
+        try:
+            from moviepy import VideoFileClip, concatenate_videoclips
+        except ImportError:
+            from moviepy.editor import VideoFileClip, concatenate_videoclips
 
         # Download each video to a temp file
         for i, url in enumerate(urls):
