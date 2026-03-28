@@ -26,7 +26,6 @@ export default function PromptForm({ onGenerate }: any) {
         🪶 writing...
       </p>
 
-
       <button
         onClick={() => onGenerate(prompt, style, audience, numScenes)}
         className="bg-black text-white px-6 py-2 rounded-md mt-4"
