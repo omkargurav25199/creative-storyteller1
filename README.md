@@ -363,9 +363,9 @@ All URLs are publicly accessible and playable directly in the browser.
 
 ## Contributors
 
-- [Your Name] — Backend / AI Agents
-- [Partner 1] — Frontend
-- [Partner 2] — DevOps / QA
+- Omkar Gurav — Backend / AI Agents
+- Shreya Srinivasan Bharadwaj — Frontend
+- Shriya Haral — DevOps / QA
 
 ---
 
