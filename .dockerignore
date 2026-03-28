@@ -1,0 +1,8 @@
+__pycache__
+*.pyc
+.env
+.git
+.adk
+test_*.py
+*.mp4
+*.wav
